@@ -4,7 +4,7 @@ import { OpportunityStatus } from '../enums/opportunity-status.enum';
 export class QueryOpportunityDto {
   @IsOptional()
   @IsEnum(OpportunityStatus, {
-    message: 'Status must be one of: Open, In Progress, Closed',
+    message: 'Status must be either "Open" or "Closed"',
   })
   status?: OpportunityStatus;
 
@@ -14,9 +14,5 @@ export class QueryOpportunityDto {
 
   @IsOptional()
   @IsString()
-  category?: string;
-
-  @IsOptional()
-  @IsString()
-  search?: string;
+  researchArea?: string;
 }

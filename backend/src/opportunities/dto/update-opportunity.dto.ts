@@ -1,13 +1,13 @@
 import {
   IsArray,
   IsDateString,
-  IsEmail,
   IsEnum,
   IsInt,
   IsOptional,
   IsString,
   Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { OpportunityStatus } from '../enums/opportunity-status.enum';
 
 export class UpdateOpportunityDto {
@@ -20,46 +20,35 @@ export class UpdateOpportunityDto {
   description?: string;
 
   @IsOptional()
+  @IsString({ message: 'Research area must be a string' })
+  researchArea?: string;
+
+  @IsOptional()
+  @IsString({ message: 'Faculty member name must be a string' })
+  facultyMemberName?: string;
+
+  @IsOptional()
   @IsString({ message: 'Department must be a string' })
   department?: string;
 
   @IsOptional()
-  @IsString({ message: 'Professor must be a string' })
-  professor?: string;
+  @IsArray({ message: 'Required skills must be an array of strings' })
+  @IsString({ each: true, message: 'Each required skill must be a string' })
+  requiredSkills?: string[];
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'Number of positions must be an integer' })
+  @Min(1, { message: 'Number of positions must be a positive integer (at least 1)' })
+  numberOfPositions?: number;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'Application deadline must be a valid ISO date string' })
+  applicationDeadline?: string;
 
   @IsOptional()
   @IsEnum(OpportunityStatus, {
-    message: 'Status must be one of: Open, In Progress, Closed',
+    message: 'Status must be either "Open" or "Closed"',
   })
   status?: OpportunityStatus;
-
-  @IsOptional()
-  @IsString({ message: 'Category must be a string' })
-  category?: string;
-
-  @IsOptional()
-  @IsArray({ message: 'Requirements must be an array of strings' })
-  @IsString({ each: true, message: 'Each requirement must be a string' })
-  requirements?: string[];
-
-  @IsOptional()
-  @IsDateString({}, { message: 'Deadline must be a valid ISO 8601 date string' })
-  deadline?: string;
-
-  @IsOptional()
-  @IsString({ message: 'Stipend must be a string' })
-  stipend?: string;
-
-  @IsOptional()
-  @IsString({ message: 'Location must be a string' })
-  location?: string;
-
-  @IsOptional()
-  @IsEmail({}, { message: 'Contact email must be a valid email address' })
-  contactEmail?: string;
-
-  @IsOptional()
-  @IsInt({ message: 'Open spots must be an integer' })
-  @Min(1, { message: 'Open spots must be at least 1' })
-  openSpots?: number;
 }

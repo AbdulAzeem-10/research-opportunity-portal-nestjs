@@ -2,9 +2,9 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
 import { UpdateOpportunityDto } from './dto/update-opportunity.dto';
+import { OpportunityStatus } from './enums/opportunity-status.enum';
 import { OpportunitiesController } from './opportunities.controller';
 import { OpportunitiesService } from './opportunities.service';
-import { OpportunityStatus } from './enums/opportunity-status.enum';
 
 describe('OpportunitiesController', () => {
   let controller: OpportunitiesController;
@@ -12,17 +12,15 @@ describe('OpportunitiesController', () => {
 
   const mockOpportunity = {
     _id: '507f1f77bcf86cd799439011',
-    title: 'Computer Vision Research Assistant',
-    description: 'Assist in training deep learning models for medical image segmentation.',
+    title: 'Computer Vision in Healthcare',
+    description: 'Developing neural networks for 3D MRI reconstruction.',
+    researchArea: 'Artificial Intelligence',
+    facultyMemberName: 'Dr. Sarah Connor',
     department: 'Computer Science',
-    professor: 'Dr. John Doe',
+    requiredSkills: ['Python', 'PyTorch', 'Linear Algebra'],
+    numberOfPositions: 2,
+    applicationDeadline: new Date('2026-12-01').toISOString(),
     status: OpportunityStatus.OPEN,
-    category: 'Computer Vision',
-    requirements: ['PyTorch', 'Python', 'Linear Algebra'],
-    stipend: '$1500/month',
-    location: 'Hybrid',
-    contactEmail: 'jdoe@univ.edu',
-    openSpots: 2,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -38,30 +36,21 @@ describe('OpportunitiesController', () => {
         new NotFoundException(`Opportunity with ID "${id}" was not found.`),
       );
     }),
-    update: jest.fn().mockImplementation((id: string, dto: UpdateOpportunityDto) => {
-      if (id === mockOpportunity._id) {
-        return Promise.resolve({ ...mockOpportunity, ...dto });
-      }
-      return Promise.reject(
-        new NotFoundException(`Opportunity with ID "${id}" was not found.`),
-      );
-    }),
+    update: jest
+      .fn()
+      .mockImplementation((id: string, dto: UpdateOpportunityDto) => {
+        if (id === mockOpportunity._id) {
+          return Promise.resolve({ ...mockOpportunity, ...dto });
+        }
+        return Promise.reject(
+          new NotFoundException(`Opportunity with ID "${id}" was not found.`),
+        );
+      }),
     remove: jest.fn().mockImplementation((id: string) => {
       if (id === mockOpportunity._id) {
         return Promise.resolve({
           message: 'Opportunity deleted successfully',
           id,
-        });
-      }
-      return Promise.reject(
-        new NotFoundException(`Opportunity with ID "${id}" was not found.`),
-      );
-    }),
-    markAsClosed: jest.fn().mockImplementation((id: string) => {
-      if (id === mockOpportunity._id) {
-        return Promise.resolve({
-          ...mockOpportunity,
-          status: OpportunityStatus.CLOSED,
         });
       }
       return Promise.reject(
@@ -90,12 +79,16 @@ describe('OpportunitiesController', () => {
   });
 
   describe('create', () => {
-    it('should create an opportunity and return it (201)', async () => {
+    it('should create an opportunity and return 201 response data', async () => {
       const dto: CreateOpportunityDto = {
-        title: 'Computer Vision Research Assistant',
-        description: 'Assist in training deep learning models for medical image segmentation.',
+        title: 'Computer Vision in Healthcare',
+        description: 'Developing neural networks for 3D MRI reconstruction.',
+        researchArea: 'Artificial Intelligence',
+        facultyMemberName: 'Dr. Sarah Connor',
         department: 'Computer Science',
-        professor: 'Dr. John Doe',
+        requiredSkills: ['Python', 'PyTorch', 'Linear Algebra'],
+        numberOfPositions: 2,
+        applicationDeadline: '2026-12-01T00:00:00.000Z',
         status: OpportunityStatus.OPEN,
       };
 
@@ -128,9 +121,10 @@ describe('OpportunitiesController', () => {
   });
 
   describe('update', () => {
-    it('should update and return the opportunity, allowing status change to Closed (200)', async () => {
+    it('should update and return the opportunity, including setting status to Closed (200)', async () => {
       const updateDto: UpdateOpportunityDto = {
         status: OpportunityStatus.CLOSED,
+        numberOfPositions: 1,
       };
 
       const result = await controller.update(
@@ -154,7 +148,7 @@ describe('OpportunitiesController', () => {
   });
 
   describe('remove', () => {
-    it('should delete opportunity and return success response (200)', async () => {
+    it('should delete opportunity and return confirmation (200)', async () => {
       const result = await controller.remove('507f1f77bcf86cd799439011');
       expect(result).toEqual({
         message: 'Opportunity deleted successfully',
@@ -163,17 +157,10 @@ describe('OpportunitiesController', () => {
       expect(service.remove).toHaveBeenCalledWith('507f1f77bcf86cd799439011');
     });
 
-    it('should throw NotFoundException if trying to delete non-existent / already deleted opportunity (404)', async () => {
+    it('should throw NotFoundException when deleting non-existent opportunity (404)', async () => {
       await expect(
         controller.remove('507f1f77bcf86cd799439099'),
       ).rejects.toThrow(NotFoundException);
-    });
-  });
-
-  describe('markClosed shortcut', () => {
-    it('should mark opportunity as Closed (200)', async () => {
-      const result = await controller.markClosed('507f1f77bcf86cd799439011');
-      expect(result.status).toBe(OpportunityStatus.CLOSED);
     });
   });
 });

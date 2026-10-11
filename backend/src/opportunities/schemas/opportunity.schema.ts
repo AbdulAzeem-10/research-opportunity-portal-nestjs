@@ -3,7 +3,6 @@ import { HydratedDocument } from 'mongoose';
 import { OpportunityStatus } from '../enums/opportunity-status.enum';
 
 export type OpportunityDocument = HydratedDocument<Opportunity>;
-export { OpportunityStatus };
 
 @Schema({
   timestamps: true,
@@ -23,10 +22,22 @@ export class Opportunity {
   description: string;
 
   @Prop({ required: true, trim: true })
-  department: string;
+  researchArea: string;
 
   @Prop({ required: true, trim: true })
-  professor: string;
+  facultyMemberName: string;
+
+  @Prop({ required: true, trim: true })
+  department: string;
+
+  @Prop({ type: [String], required: true, default: [] })
+  requiredSkills: string[];
+
+  @Prop({ type: Number, required: true, min: 1 })
+  numberOfPositions: number;
+
+  @Prop({ type: Date, required: true })
+  applicationDeadline: Date;
 
   @Prop({
     type: String,
@@ -35,32 +46,6 @@ export class Opportunity {
     default: OpportunityStatus.OPEN,
   })
   status: OpportunityStatus;
-
-  @Prop({ trim: true, default: 'General Research' })
-  category: string;
-
-  @Prop({ type: [String], default: [] })
-  requirements: string[];
-
-  @Prop({ type: Date, default: null })
-  deadline: Date;
-
-  @Prop({ trim: true, default: 'Unpaid / Course Credit' })
-  stipend: string;
-
-  @Prop({ trim: true, default: 'On-Campus' })
-  location: string;
-
-  @Prop({ trim: true })
-  contactEmail: string;
-
-  @Prop({ type: Number, default: 1 })
-  openSpots: number;
 }
 
 export const OpportunitySchema = SchemaFactory.createForClass(Opportunity);
-
-// Add index on status and department for fast lookups
-OpportunitySchema.index({ status: 1 });
-OpportunitySchema.index({ department: 1 });
-OpportunitySchema.index({ title: 'text', description: 'text' });

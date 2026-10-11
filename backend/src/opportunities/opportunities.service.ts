@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -9,16 +8,10 @@ import { Model, Types } from 'mongoose';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
 import { QueryOpportunityDto } from './dto/query-opportunity.dto';
 import { UpdateOpportunityDto } from './dto/update-opportunity.dto';
-import { OpportunityStatus } from './enums/opportunity-status.enum';
-import {
-  Opportunity,
-  OpportunityDocument,
-} from './schemas/opportunity.schema';
+import { Opportunity, OpportunityDocument } from './schemas/opportunity.schema';
 
 @Injectable()
 export class OpportunitiesService {
-  private readonly logger = new Logger(OpportunitiesService.name);
-
   constructor(
     @InjectModel(Opportunity.name)
     private readonly opportunityModel: Model<OpportunityDocument>,
@@ -27,7 +20,6 @@ export class OpportunitiesService {
   async create(
     createOpportunityDto: CreateOpportunityDto,
   ): Promise<OpportunityDocument> {
-    this.logger.log(`Creating opportunity: "${createOpportunityDto.title}"`);
     const created = new this.opportunityModel(createOpportunityDto);
     return await created.save();
   }
@@ -45,17 +37,8 @@ export class OpportunitiesService {
       filter.department = { $regex: queryDto.department, $options: 'i' };
     }
 
-    if (queryDto.category) {
-      filter.category = { $regex: queryDto.category, $options: 'i' };
-    }
-
-    if (queryDto.search) {
-      filter.$or = [
-        { title: { $regex: queryDto.search, $options: 'i' } },
-        { description: { $regex: queryDto.search, $options: 'i' } },
-        { professor: { $regex: queryDto.search, $options: 'i' } },
-        { department: { $regex: queryDto.search, $options: 'i' } },
-      ];
+    if (queryDto.researchArea) {
+      filter.researchArea = { $regex: queryDto.researchArea, $options: 'i' };
     }
 
     return await this.opportunityModel
@@ -67,7 +50,7 @@ export class OpportunitiesService {
   async findOne(id: string): Promise<OpportunityDocument> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException(
-        `Invalid Opportunity ID: "${id}". Must be a valid 24-character hexadecimal MongoDB ObjectId.`,
+        `Invalid opportunity ID: "${id}". Expected a valid 24-character hexadecimal MongoDB ObjectId.`,
       );
     }
 
@@ -85,29 +68,29 @@ export class OpportunitiesService {
   ): Promise<OpportunityDocument> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException(
-        `Invalid Opportunity ID: "${id}". Must be a valid 24-character hexadecimal MongoDB ObjectId.`,
+        `Invalid opportunity ID: "${id}". Expected a valid 24-character hexadecimal MongoDB ObjectId.`,
       );
     }
 
     const updated = await this.opportunityModel
-      .findByIdAndUpdate(id, { $set: updateOpportunityDto }, {
-        new: true,
-        runValidators: true,
-      })
+      .findByIdAndUpdate(
+        id,
+        { $set: updateOpportunityDto },
+        { new: true, runValidators: true },
+      )
       .exec();
 
     if (!updated) {
       throw new NotFoundException(`Opportunity with ID "${id}" was not found.`);
     }
 
-    this.logger.log(`Opportunity updated: "${id}"`);
     return updated;
   }
 
   async remove(id: string): Promise<{ message: string; id: string }> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException(
-        `Invalid Opportunity ID: "${id}". Must be a valid 24-character hexadecimal MongoDB ObjectId.`,
+        `Invalid opportunity ID: "${id}". Expected a valid 24-character hexadecimal MongoDB ObjectId.`,
       );
     }
 
@@ -116,14 +99,9 @@ export class OpportunitiesService {
       throw new NotFoundException(`Opportunity with ID "${id}" was not found.`);
     }
 
-    this.logger.log(`Opportunity deleted: "${id}"`);
     return {
       message: 'Opportunity deleted successfully',
       id,
     };
-  }
-
-  async markAsClosed(id: string): Promise<OpportunityDocument> {
-    return this.update(id, { status: OpportunityStatus.CLOSED });
   }
 }

@@ -9,21 +9,23 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 5000;
+  const frontendOrigin =
+    configService.get<string>('FRONTEND_ORIGIN') || 'http://localhost:3000';
 
-  // Enable CORS
+  // Configure CORS for frontend development origin
   app.enableCors({
-    origin: '*',
+    origin: frontendOrigin,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 
-  // Global API route prefix
+  // Global /api prefix
   app.setGlobalPrefix('api');
 
-  // Global Exception Filter
+  // Global exception filter for consistent 400/404/500 JSON error responses
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // Global Validation Pipe with automatic transformation and strict whitelist
+  // Global validation pipe: rejects unknown fields and validates payloads
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -36,7 +38,6 @@ async function bootstrap() {
   );
 
   await app.listen(port);
-  console.log(`🚀 Research Opportunity API is running on: http://localhost:${port}/api`);
-  console.log(`📡 Opportunities endpoint: http://localhost:${port}/api/opportunities`);
+  console.log(`🚀 Research Opportunity API running on: http://localhost:${port}/api`);
 }
 bootstrap();
