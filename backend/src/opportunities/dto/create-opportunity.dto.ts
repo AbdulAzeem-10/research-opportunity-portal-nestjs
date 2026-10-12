@@ -39,11 +39,16 @@ export class CreateOpportunityDto {
   @IsNotEmpty({ message: 'Number of positions is required' })
   @Type(() => Number)
   @IsInt({ message: 'Number of positions must be an integer' })
-  @Min(1, { message: 'Number of positions must be a positive integer (at least 1)' })
+  @Min(1, {
+    message: 'Number of positions must be a positive integer (at least 1)',
+  })
   numberOfPositions: number;
 
   @IsNotEmpty({ message: 'Application deadline is required' })
-  @IsDateString({}, { message: 'Application deadline must be a valid ISO date string' })
+  @IsDateString(
+    {},
+    { message: 'Application deadline must be a valid ISO date string' },
+  )
   applicationDeadline: string;
 
   @IsOptional()

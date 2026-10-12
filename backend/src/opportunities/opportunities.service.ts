@@ -1,10 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
 import { QueryOpportunityDto } from './dto/query-opportunity.dto';
 import { UpdateOpportunityDto } from './dto/update-opportunity.dto';
@@ -24,9 +20,7 @@ export class OpportunitiesService {
     return await created.save();
   }
 
-  async findAll(
-    queryDto: QueryOpportunityDto = {},
-  ): Promise<OpportunityDocument[]> {
+  async findAll(queryDto: QueryOpportunityDto = {}): Promise<Opportunity[]> {
     const filter: Record<string, any> = {};
 
     if (queryDto.status) {
@@ -44,17 +38,12 @@ export class OpportunitiesService {
     return await this.opportunityModel
       .find(filter)
       .sort({ createdAt: -1 })
+      .lean()
       .exec();
   }
 
-  async findOne(id: string): Promise<OpportunityDocument> {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException(
-        `Invalid opportunity ID: "${id}". Expected a valid 24-character hexadecimal MongoDB ObjectId.`,
-      );
-    }
-
-    const opportunity = await this.opportunityModel.findById(id).exec();
+  async findOne(id: string): Promise<Opportunity> {
+    const opportunity = await this.opportunityModel.findById(id).lean().exec();
     if (!opportunity) {
       throw new NotFoundException(`Opportunity with ID "${id}" was not found.`);
     }
@@ -66,17 +55,11 @@ export class OpportunitiesService {
     id: string,
     updateOpportunityDto: UpdateOpportunityDto,
   ): Promise<OpportunityDocument> {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException(
-        `Invalid opportunity ID: "${id}". Expected a valid 24-character hexadecimal MongoDB ObjectId.`,
-      );
-    }
-
     const updated = await this.opportunityModel
       .findByIdAndUpdate(
         id,
         { $set: updateOpportunityDto },
-        { new: true, runValidators: true },
+        { returnDocument: 'after', runValidators: true },
       )
       .exec();
 
@@ -88,12 +71,6 @@ export class OpportunitiesService {
   }
 
   async remove(id: string): Promise<{ message: string; id: string }> {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException(
-        `Invalid opportunity ID: "${id}". Expected a valid 24-character hexadecimal MongoDB ObjectId.`,
-      );
-    }
-
     const deleted = await this.opportunityModel.findByIdAndDelete(id).exec();
     if (!deleted) {
       throw new NotFoundException(`Opportunity with ID "${id}" was not found.`);

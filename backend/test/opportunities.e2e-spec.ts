@@ -44,10 +44,16 @@ describe('Opportunities API (e2e)', () => {
       expect(response.body.message).toContain('Title is required');
       expect(response.body.message).toContain('Description is required');
       expect(response.body.message).toContain('Research area is required');
-      expect(response.body.message).toContain('Faculty member name is required');
+      expect(response.body.message).toContain(
+        'Faculty member name is required',
+      );
       expect(response.body.message).toContain('Department is required');
-      expect(response.body.message).toContain('Number of positions is required');
-      expect(response.body.message).toContain('Application deadline is required');
+      expect(response.body.message).toContain(
+        'Number of positions is required',
+      );
+      expect(response.body.message).toContain(
+        'Application deadline is required',
+      );
     });
 
     it('should return 400 when status is invalid', async () => {
@@ -167,7 +173,9 @@ describe('Opportunities API (e2e)', () => {
         .expect(400);
 
       expect(response.body.statusCode).toBe(400);
-      expect(response.body.message).toContain('Expected a valid 24-character hexadecimal MongoDB ObjectId');
+      expect(response.body.message).toContain(
+        'Expected a valid 24-character hexadecimal MongoDB ObjectId',
+      );
     });
 
     it('should return 404 when ID does not exist', async () => {

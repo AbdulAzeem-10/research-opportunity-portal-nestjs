@@ -1,17 +1,31 @@
-# University Research Opportunity Portal - Backend (NestJS + MongoDB)
+# University Research Opportunity Portal
 
-A REST API backend built for the University Research Opportunity Portal assignment using NestJS, TypeScript, MongoDB, and Mongoose.
+A full-stack web application for managing university research opportunities, built with NestJS (backend) and React + Vite (frontend), using MongoDB Atlas for data persistence.
 
-## 📋 Technology Stack & Features
+## 📋 Technology Stack
 
-- **Framework**: NestJS (TypeScript)
-- **Database & ODM**: MongoDB & Mongoose
-- **Global Route Prefix**: `/api`
-- **CORS**: Configured using `FRONTEND_ORIGIN` environment variable (defaults to `http://localhost:3000`)
-- **Configuration**: `@nestjs/config` reading `MONGODB_URI` from `.env`
-- **Validation**: `class-validator` & `class-transformer` with strict whitelist and descriptive HTTP 400 responses
-- **Error Handling**: Global exception filter (`AllExceptionsFilter`) producing standardized HTTP 400, 404, and 500 JSON responses
-- **Logging**: HTTP middleware logging request methods, paths, status codes, and durations
+### Backend
+- **Framework**: NestJS (Node.js with TypeScript)
+- **Database**: MongoDB Atlas
+- **ODM**: Mongoose
+- **Validation**: class-validator & class-transformer
+- **Configuration**: @nestjs/config with environment variables
+
+### Frontend
+- **Framework**: React 19
+- **Build Tool**: Vite 8
+- **Language**: TypeScript
+- **Styling**: Custom CSS
+- **Icons**: Lucide React
+
+### Key Features
+- **REST API** with `/api` global prefix
+- **CORS** configured for local development
+- **Data Validation** with descriptive error messages (HTTP 400/404/500)
+- **MongoDB Persistence** with automatic timestamps
+- **Request Logging** middleware
+- **Responsive UI** with loading/empty/error states
+- **Real-time Updates** after CRUD operations
 
 ---
 
@@ -92,85 +106,211 @@ All endpoints are prefixed under `/api`:
 ## 📂 Project Structure
 
 ```
-├── .env.example
-├── .gitignore
-├── README.md
-├── backend/
-│   ├── .env                    # Environment file (ignored by Git)
-│   ├── .env.example            # Placeholder environment template
+research-opportunity-portal/
+├── backend/                    # NestJS REST API
 │   ├── src/
-│   │   ├── common/
-│   │   │   ├── filters/        # Global exception filter (AllExceptionsFilter)
-│   │   │   ├── middleware/     # Logger middleware
-│   │   │   └── pipes/          # ParseObjectIdPipe for ObjectId validation
-│   │   ├── opportunities/
-│   │   │   ├── dto/            # CreateOpportunityDto, UpdateOpportunityDto, QueryOpportunityDto
-│   │   │   ├── enums/          # OpportunityStatus (Open, Closed)
-│   │   │   ├── schemas/        # Opportunity Mongoose Schema
+│   │   ├── common/            # Global filters, middleware, pipes
+│   │   ├── config/            # Database configuration
+│   │   ├── opportunities/     # Feature module
+│   │   │   ├── dto/           # Data Transfer Objects
+│   │   │   ├── enums/         # OpportunityStatus enum
+│   │   │   ├── schemas/       # Mongoose schema
 │   │   │   ├── opportunities.controller.ts
 │   │   │   ├── opportunities.service.ts
 │   │   │   └── opportunities.module.ts
 │   │   ├── app.module.ts
 │   │   └── main.ts
-│   └── test/
-│       ├── opportunities.e2e-spec.ts
-│       └── jest-e2e.json
-└── postman/
-    └── Opportunities_API.postman_collection.json
+│   ├── test/                  # E2E tests
+│   ├── .env                   # Environment variables (gitignored)
+│   ├── .env.example           # Environment template
+│   └── package.json
+│
+├── frontend/                  # React + Vite application
+│   ├── src/
+│   │   ├── components/        # React components
+│   │   ├── services/          # API service layer
+│   │   ├── types/             # TypeScript types
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── .env                   # Frontend environment (gitignored)
+│   ├── .env.example           # Frontend env template
+│   └── package.json
+│
+├── .gitignore
+└── README.md
 ```
 
 ---
 
 ## 🚀 Setup & Execution Guide
 
-### 1. Install Dependencies
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+- MongoDB Atlas account (or local MongoDB)
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/AbdulAzeem-10/research-opportunity-portal-nestjs.git
+cd research-opportunity-portal-nestjs
+```
+
+### 2. Backend Setup
+
+#### Install Dependencies
 ```bash
 cd backend
 npm install
 ```
 
-### 2. Configure Environment Variables
-Copy `.env.example` to `.env`:
+#### Configure Environment
+Create `.env` file from the template:
 ```bash
-cp backend/.env.example backend/.env
-```
-Default `.env` configuration:
-```env
-PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/research_opportunity_db
-FRONTEND_ORIGIN=http://localhost:3000
-NODE_ENV=development
+cp .env.example .env
 ```
 
-### 3. Start the NestJS Backend
-Development mode:
+Edit `backend/.env` with your MongoDB Atlas credentials:
+```env
+PORT=5000
+NODE_ENV=development
+
+# MongoDB Atlas Connection String
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/research_opportunity_db?retryWrites=true&w=majority
+
+# Frontend origin for CORS
+FRONTEND_ORIGIN=http://localhost:5173
+```
+
+#### Start Backend Server
 ```bash
-cd backend
 npm run start:dev
 ```
-Production build:
+The API will be accessible at `http://localhost:5000/api`
+
+### 3. Frontend Setup
+
+#### Install Dependencies
 ```bash
-cd backend
-npm run build
-npm run start:prod
+cd frontend
+npm install
 ```
-The API will be accessible at `http://localhost:5000/api`.
+
+#### Configure Environment
+Create `.env` file from the template:
+```bash
+cp .env.example .env
+```
+
+Edit `frontend/.env`:
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+#### Start Frontend Server
+```bash
+npm run dev
+```
+The application will open at `http://localhost:5173`
 
 ---
 
 ## 🧪 Running Tests
-Unit tests:
+
+### Backend Tests
 ```bash
 cd backend
+
+# Unit tests
 npm test
-```
-End-to-end tests:
-```bash
-cd backend
+
+# E2E tests
 npm run test:e2e
+
+# Test coverage
+npm run test:cov
+```
+
+### Frontend Build
+```bash
+cd frontend
+
+# Lint
+npm run lint
+
+# Build for production
+npm run build
 ```
 
 ---
 
-## 📬 Postman Collection
-Import [`postman/Opportunities_API.postman_collection.json`](postman/Opportunities_API.postman_collection.json) into Postman to test all endpoints.
+## 🌐 Using the Application
+
+1. **Open the application** at `http://localhost:5173`
+2. **Create an opportunity** by clicking "Post Opportunity"
+3. **View details** by clicking on an opportunity card
+4. **Edit** an opportunity using the edit button
+5. **Mark as Closed** when positions are filled
+6. **Delete** opportunities that are no longer relevant
+7. **Search and Filter** by status (Open/Closed) or keywords
+
+All data persists to MongoDB Atlas and survives page refreshes.
+
+---
+
+## 📬 API Testing
+
+You can test the API directly using tools like Postman or curl:
+
+```bash
+# Get all opportunities
+curl http://localhost:5000/api/opportunities
+
+# Create a new opportunity
+curl -X POST http://localhost:5000/api/opportunities \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "AI Research Assistant",
+    "description": "Work on cutting-edge AI projects",
+    "researchArea": "Artificial Intelligence",
+    "facultyMemberName": "Dr. Smith",
+    "department": "Computer Science",
+    "requiredSkills": ["Python", "Machine Learning"],
+    "numberOfPositions": 2,
+    "applicationDeadline": "2027-12-31T23:59:59.000Z",
+    "status": "Open"
+  }'
+
+# Get single opportunity
+curl http://localhost:5000/api/opportunities/<id>
+
+# Update opportunity
+curl -X PUT http://localhost:5000/api/opportunities/<id> \
+  -H "Content-Type: application/json" \
+  -d '{"status": "Closed"}'
+
+# Delete opportunity
+curl -X DELETE http://localhost:5000/api/opportunities/<id>
+```
+
+---
+
+## 🔒 Security Notes
+
+- `.env` files are gitignored and never committed
+- MongoDB credentials should be kept secure
+- CORS is configured for development (localhost origins only)
+- Input validation prevents malformed data
+- MongoDB ObjectId format is validated before queries
+
+---
+
+## 📝 License
+
+This project is created for educational purposes as part of a university assignment.
+
+---
+
+## 👨‍💻 Author
+
+**Abdul Azeem**
+- GitHub: [@AbdulAzeem-10](https://github.com/AbdulAzeem-10)

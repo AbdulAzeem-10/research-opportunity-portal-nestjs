@@ -10,11 +10,29 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 5000;
   const frontendOrigin =
-    configService.get<string>('FRONTEND_ORIGIN') || 'http://localhost:3000';
+    configService.get<string>('FRONTEND_ORIGIN') || 'http://localhost:5173';
 
-  // Configure CORS for frontend development origin
+  // Configure CORS for frontend development origins
+  const allowedOrigins = [
+    frontendOrigin,
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:3000',
+  ];
+
   app.enableCors({
-    origin: frontendOrigin,
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)
+      ) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
@@ -38,6 +56,8 @@ async function bootstrap() {
   );
 
   await app.listen(port);
-  console.log(`🚀 Research Opportunity API running on: http://localhost:${port}/api`);
+  console.log(
+    `🚀 Research Opportunity API running on: http://localhost:${port}/api`,
+  );
 }
 bootstrap();
